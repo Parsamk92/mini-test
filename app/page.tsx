@@ -2,12 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-// ✅ Import WebApp *inside* the component so it's only accessed on the client
-let WebApp: any;
-if (typeof window !== "undefined") {
-  WebApp = require("@twa-dev/sdk").default;
-}
-
 interface UserData {
   id: number;
   first_name: string;
@@ -21,8 +15,14 @@ export default function Home() {
   const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && WebApp?.initDataUnsafe?.user) {
-      setUserData(WebApp.initDataUnsafe.user as UserData);
+    if (typeof window !== 'undefined') {
+      // 👇 Dynamically import the Telegram SDK only on the client
+      import('@twa-dev/sdk').then((module) => {
+        const WebApp = module.default;
+        if (WebApp.initDataUnsafe?.user) {
+          setUserData(WebApp.initDataUnsafe.user as UserData);
+        }
+      });
     }
   }, []);
 
@@ -34,10 +34,10 @@ export default function Home() {
           <ul>
             <li>ID: {userData.id}</li>
             <li>First Name: {userData.first_name}</li>
-            <li>Last Name: {userData.last_name || "N/A"}</li>
-            <li>Username: {userData.username || "N/A"}</li>
+            <li>Last Name: {userData.last_name || 'N/A'}</li>
+            <li>Username: {userData.username || 'N/A'}</li>
             <li>Language Code: {userData.language_code}</li>
-            <li>Is Premium: {userData.is_premium ? "Yes" : "No"}</li>
+            <li>Is Premium: {userData.is_premium ? 'Yes' : 'No'}</li>
           </ul>
         </>
       ) : (
